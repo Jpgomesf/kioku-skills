@@ -1,0 +1,11 @@
+{
+  "name": "kioku-hooks",
+  "description": "Brings Kioku memory into Claude Code sessions: notes at session start, for each prompt and for each file opened; a nudge to save after a commit or every few prompts; and a background review of the transcript at compaction and session end. Claude Code only.",
+  "version": "2.4.0",
+  "author": {
+    "name": "Jpgomesf",
+    "url": "https://github.com/Jpgomesf"
+  },
+  "license": "MIT",
+  "keywords": ["kioku", "memory", "hooks", "mcp"]
+}

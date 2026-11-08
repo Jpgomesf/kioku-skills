@@ -1,0 +1,20 @@
+{
+  "kioku_home": "",
+  "provider": "anthropic",
+  "drift_scanner": "",
+  "bundles": [],
+  "id_patterns": [],
+  "prefetch": {
+    "min_relevance": 0.68,
+    "max_notes": 3
+  },
+  "nudge": {
+    "every_prompts": 8
+  },
+  "review": {
+    "model": "sonnet"
+  },
+  "dream": {
+    "enabled": false
+  }
+}

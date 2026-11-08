@@ -1,0 +1,15 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "kioku-memory",
+  "version": "1.0.0",
+  "description": "Skills that keep a project's Kioku memory useful: checkpoint a session, orient a decision, refresh stale notes, sync a project's history, audit what is stored, and consolidate notes.",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Kioku Memory",
+        "shortDescription": "Save, check and consolidate a project's Kioku memory",
+        "category": "Productivity"
+      }
+    }
+  }
+}

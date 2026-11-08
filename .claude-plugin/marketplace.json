@@ -1,0 +1,22 @@
+{
+  "name": "kioku-skills",
+  "description": "Skills and hooks for Kioku, a local MCP memory server for coding agents.",
+  "owner": {
+    "name": "Jpgomesf",
+    "url": "https://github.com/Jpgomesf"
+  },
+  "plugins": [
+    {
+      "name": "kioku-memory",
+      "source": "./plugins/kioku-memory",
+      "description": "Skills that keep a project's Kioku memory useful: checkpoint a session, orient a decision, refresh stale notes, sync a project's history, audit what is stored, and consolidate notes.",
+      "version": "1.0.0"
+    },
+    {
+      "name": "kioku-hooks",
+      "source": "./plugins/kioku-hooks",
+      "description": "Brings Kioku memory into Claude Code sessions: notes at session start, for each prompt and for each file opened; a nudge to save after a commit or every few prompts; and a background review of the transcript at compaction and session end. Claude Code only.",
+      "version": "2.4.0"
+    }
+  ]
+}

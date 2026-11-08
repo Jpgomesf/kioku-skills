@@ -1,0 +1,71 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 -I \"${CLAUDE_PLUGIN_ROOT}/scripts/kioku_hook.py\" session-start",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 -I \"${CLAUDE_PLUGIN_ROOT}/scripts/kioku_hook.py\" prompt",
+            "timeout": 8
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 -I \"${CLAUDE_PLUGIN_ROOT}/scripts/kioku_hook.py\" pre-read",
+            "timeout": 8
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 -I \"${CLAUDE_PLUGIN_ROOT}/scripts/kioku_hook.py\" stop",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 -I \"${CLAUDE_PLUGIN_ROOT}/scripts/kioku_hook.py\" pre-compact",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 -I \"${CLAUDE_PLUGIN_ROOT}/scripts/kioku_hook.py\" session-end",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

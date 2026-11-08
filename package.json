@@ -1,0 +1,9 @@
+{
+  "name": "kioku-skills",
+  "private": true,
+  "description": "Skills and hooks for Kioku, a local MCP memory server for coding agents",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test 'plugins/**/tests/*.test.mjs'"
+  }
+}
