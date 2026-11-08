@@ -173,7 +173,7 @@ Read every note in the topic, then propose changes of these kinds, only where on
 - replace: a decision a newer one replaced without saying so. "note" is the newer decision with "Replaces <key> (<date>): <why>" in its body; "retire" lists the old one.
 Give one change per note: when a note needs a rewrite, a link and an anchor, make them one change under its main action.
 A decision note (tag decision, or a key with decisions/ or DEC-) may be reworded, never changed in what it decides: its choice, scope, reason, rejected options and consequence stay as stored.
-For every change give "note": the key, title and body, plus only the fields the change sets (tags, related or paths, as full lists, and source); leave out the fields you don't change, so Kioku keeps them. Aliases only grow: on a stored note give just the aliases to add (memory_get returns its current ones; don't repeat them), and the apply step keeps every stored alias; on a new note give its full list. Also give "origin" (agent, file, or new for a new note); "why" in one sentence; and "evidence": the stored text, and for anchors the files the globs match. Nothing that describes what code does, no secrets, no new facts. Notes of origin file can be proposed but are never saved by you.
+For every change give "note": the key, title and body, plus only the fields the change sets (tags, related or paths, as full lists, and source); leave out the fields you don't change, so Kioku keeps them. Aliases only grow: on a stored note give just the aliases to add (memory_get returns its current ones; don't repeat them), and the apply step keeps every stored alias; on a new note give its full list. Put every alias you add in note.aliases: an alias named only in why or evidence is never saved. Also give "origin" (agent, file, or new for a new note); "why" in one sentence; and "evidence": the stored text, and for anchors the files the globs match. Nothing that describes what code does, no secrets, no new facts. Notes of origin file can be proposed but are never saved by you.
 
 Note format:
 ${a.noteFormat}`
@@ -207,9 +207,25 @@ if (topics.length) {
   proposed.forEach((r, i) => { if (!r) failedTopics.push(topics[i].name) })
   changes = proposed.filter(Boolean).flat().filter(c => c && c.note && c.note.key)
 }
-const toVerify = changes.slice(0, maxVerify)
-const overCap = changes.slice(maxVerify)
-if (overCap.length) log(`${changes.length} changes; verifying ${toVerify.length}, reporting ${overCap.length} unverified`)
+// Verification takes one change from each topic in turn, so a cap can't leave whole
+// topics unchecked.
+function inTurns(items, groupOf) {
+  const groups = new Map()
+  for (const item of items) {
+    const group = groupOf(item)
+    if (!groups.has(group)) groups.set(group, [])
+    groups.get(group).push(item)
+  }
+  const lists = [...groups.values()]
+  const longest = Math.max(0, ...lists.map(l => l.length))
+  const ordered = []
+  for (let i = 0; i < longest; i++) for (const list of lists) if (i < list.length) ordered.push(list[i])
+  return ordered
+}
+const ordered = inTurns(changes, c => c.topic)
+const toVerify = ordered.slice(0, maxVerify)
+const overCap = ordered.slice(maxVerify)
+if (overCap.length) log(`${changes.length} changes; verifying ${toVerify.length}, one topic at a time, reporting ${overCap.length} unverified`)
 
 let verified = []
 let refuted = []

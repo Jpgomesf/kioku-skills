@@ -141,6 +141,25 @@ test('aliases the apply agent could not merge, on an older server, are reported'
   assert.deepEqual(result.saved, ['b-note'])
 })
 
+test('changes are verified one topic at a time, so a cap reaches every topic', async () => {
+  const s = stubs(baseArgs({ maxVerify: 2 }), responder({
+    topics: [{ name: 'first', keys: ['auth-ttl', 'b-note', 'c-note'] }, { name: 'second', keys: ['d-note'] }],
+    changes: {
+      first: [change('rewrite', 'auth-ttl'), change('rewrite', 'b-note'), change('rewrite', 'c-note')],
+      second: [change('rewrite', 'd-note')],
+    },
+  }))
+  const result = await workflow.run(s)
+  assert.deepEqual(s.labels('verify:'), ['verify:rewrite:auth-ttl', 'verify:rewrite:d-note'])
+  assert.deepEqual(result.unverified.map(c => c.note.key), ['b-note', 'c-note'])
+})
+
+test('the improve prompt asks for every added alias in the note itself', async () => {
+  const s = stubs(baseArgs(), responder({ changes: { core: [change('rewrite', 'b-note')] } }))
+  await workflow.run(s)
+  assert.match(s.prompt('improve:core'), /an alias named only in why or evidence is never saved/)
+})
+
 test('a scheduled run keeps the topics with the most notes changed since the last dream', async () => {
   const topics = [
     { name: 'old', keys: ['c-note', 'kb-fact'] },

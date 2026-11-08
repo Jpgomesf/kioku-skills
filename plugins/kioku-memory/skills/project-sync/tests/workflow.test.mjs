@@ -36,15 +36,20 @@ const proposal = (action, key, extra = {}) => ({
 })
 
 // Answers each agent of a sync run; tests override the parts they exercise.
-function responder({ harvest, proposals = [], verdict, apply } = {}) {
+// `proposals` is one list for every topic, or a list per topic name; `topics` replaces
+// the merge's single topic.
+function responder({ harvest, proposals = [], verdict, apply, topics } = {}) {
   return call => {
     const { label, prompt } = call
     if (label.startsWith('harvest:')) return harvest ? harvest(call) : { candidates: [candidate(`claim from ${label}`)] }
     if (label === 'merge') {
+      if (topics) return { topics }
       const count = (prompt.match(/^\d+\. /gm) || []).length
       return { topics: [{ name: 'auth', groups: [Array.from({ length: count }, (_, i) => i)] }] }
     }
-    if (label.startsWith('reconcile:')) return { proposals }
+    if (label.startsWith('reconcile:')) {
+      return { proposals: Array.isArray(proposals) ? proposals : (proposals[label.slice('reconcile:'.length)] || []) }
+    }
     if (label.startsWith('verify:')) return verdict ? verdict(call) : { real: true, reason: 'the evidence says so' }
     if (label === 'apply') return apply ? apply(call) : { results: itemsOf(prompt).map(i => ({ key: i.key, domain: i.domain, ok: true })) }
     if (label === 'report') return 'the report'
@@ -112,6 +117,23 @@ test('carried proposals are verified first, within maxVerify', async () => {
   const items = itemsOf(s.prompt('apply'))
   assert.deepEqual(items.map(i => [i.key, i.not_changed_since]), [['carried-a', '2026-11-01T00:00:00Z'], ['fresh-a', STARTED]])
   assert.equal(result.counts.carried, 2)
+})
+
+test('fresh proposals are verified one topic at a time, so a cap reaches every topic', async () => {
+  const batches = [
+    { id: 'commits-demo-1', kind: 'commits', repo: '/r/demo', items: 3, index: 0 },
+    { id: 'commits-demo-2', kind: 'commits', repo: '/r/demo', items: 3, index: 1 },
+  ]
+  const s = stubs(baseArgs({ batches, maxVerify: 2 }), responder({
+    topics: [{ name: 'auth', groups: [[0]] }, { name: 'deploys', groups: [[1]] }],
+    proposals: {
+      auth: [proposal('new', 'auth-a'), proposal('new', 'auth-b'), proposal('new', 'auth-c')],
+      deploys: [proposal('new', 'deploy-a')],
+    },
+  }))
+  const result = await workflow.run(s)
+  assert.deepEqual(s.labels('verify:'), ['verify:auth-a', 'verify:deploy-a'])
+  assert.deepEqual(result.unverified.map(p => p.key), ['auth-b', 'auth-c'])
 })
 
 test('a verification that fails leaves its proposal unverified, to be carried', async () => {

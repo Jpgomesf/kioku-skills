@@ -312,7 +312,22 @@ const noteId = p => `${p.domain || a.domain}/${p.key}`
 const freshIds = new Set(freshWrites.map(noteId))
 const carried = carriedIn.filter(p => !freshIds.has(noteId(p))).map(p => ({ ...p, carried: true }))
 if (carried.length < carriedIn.length) log(`${carriedIn.length - carried.length} carried proposals replaced by fresh ones for the same notes`)
-const writes = [...carried, ...freshWrites]
+// Fresh proposals are verified one topic at a time, so a cap can't leave whole topics
+// unchecked.
+function inTurns(items, groupOf) {
+  const groups = new Map()
+  for (const item of items) {
+    const group = groupOf(item)
+    if (!groups.has(group)) groups.set(group, [])
+    groups.get(group).push(item)
+  }
+  const lists = [...groups.values()]
+  const longest = Math.max(0, ...lists.map(l => l.length))
+  const ordered = []
+  for (let i = 0; i < longest; i++) for (const list of lists) if (i < list.length) ordered.push(list[i])
+  return ordered
+}
+const writes = [...carried, ...inTurns(freshWrites, p => p.topic || '')]
 const toVerify = writes.slice(0, maxVerify)
 const overCap = writes.slice(maxVerify)
 log(`${writes.length} proposals (${carried.length} carried); verifying ${toVerify.length}${overCap.length ? `, carrying ${overCap.length} to the next run` : ''}`)
