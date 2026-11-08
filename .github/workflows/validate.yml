@@ -13,11 +13,16 @@ jobs:
       - run: make lint
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        # 3.9 is what the hooks run on (macOS's /usr/bin/python3).
-        python: ["3.9", "3.13"]
+        include:
+          # 3.9 is what the hooks run on (macOS's /usr/bin/python3); its last builds are for Ubuntu 24.04.
+          - python: "3.9"
+            os: ubuntu-24.04
+          - python: "3.13"
+            os: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
